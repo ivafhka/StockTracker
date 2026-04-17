@@ -1,0 +1,8 @@
+services:
+  postgres:
+    environment:
+      POSTGRES_PASSWORD: 150208
+
+  kafka:
+    environment:
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
