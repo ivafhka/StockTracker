@@ -433,3 +433,6 @@ coverage/
 # JetBrains Rider
 .idea/
 *.sln.iml
+
+docker/.env
+docker/volumes/
