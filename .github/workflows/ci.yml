@@ -8,14 +8,13 @@ on:
 
 jobs:
   build-and-test:
-    name: Build & Test
+    name: Build and Test
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-     - name: Setup .NET 10
+      - name: Setup .NET 10
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
