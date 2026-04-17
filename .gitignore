@@ -416,3 +416,20 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+# Secrets
+.env
+appsettings.*.json
+!appsettings.json
+!appsettings.Development.json
+
+# Docker volumes
+docker/volumes/
+
+# Test results
+TestResults/
+coverage/
+*.coverage
+
+# JetBrains Rider
+.idea/
+*.sln.iml
