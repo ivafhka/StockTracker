@@ -4,14 +4,15 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>dotnet-StockTracker.Worker-b85edba7-d832-43a4-a442-6c640406d78f</UserSecretsId>
+    <UserSecretsId>dotnet-StockTracker.Worker-c7275b61-4efe-46ff-b6b5-a9a4b0829831</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.6" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\StockTracker.Infrastructure\StockTracker.Infrastructure.csproj" />
   </ItemGroup>
+
 </Project>
