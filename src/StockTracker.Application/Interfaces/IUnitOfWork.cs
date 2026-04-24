@@ -4,7 +4,8 @@ using System.Text;
 
 namespace StockTracker.Application.Interfaces
 {
-    internal interface IUnitOfWork
+    public interface IUnitOfWork
     {
+        Task<int> SaveChangeAsync(CancellationToken cancellationToken = default);
     }
 }

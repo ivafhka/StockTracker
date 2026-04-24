@@ -4,7 +4,19 @@ using System.Text;
 
 namespace StockTracker.Application.Interfaces
 {
-    internal interface INotificationSender
+    public interface INotificationSender
     {
+        Task SendAsync(
+            Guid userId,
+            string subject,
+            string message,
+            NotificationChannel channel,
+            CancellationToken cancellationToken = default);
+    }
+
+    public enum NotificationChannel
+    {
+        Email = 1,
+        Telegram = 2
     }
 }
