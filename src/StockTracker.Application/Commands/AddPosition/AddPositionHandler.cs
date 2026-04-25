@@ -37,7 +37,7 @@ namespace StockTracker.Application.Commands.AddPosition
                 var position = portfolio.AddPosition(ticker, request.Quanity, buyPrice);
 
                 await _portfolioRepository.UpdateAsync(portfolio, cancellationToken);
-                await _unitOfWork.SaveChangeAsync(cancellationToken);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
 
                 var domainEvent = new PositionOpenedEvent(
                     PositionId: position.Id,
