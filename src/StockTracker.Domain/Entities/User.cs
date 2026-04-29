@@ -4,9 +4,9 @@ namespace StockTracker.Domain.Entities
 {
     public class User : Entity
     {
-        public string Email { get; private set; }
-        public string PasswordHash { get; private set; }
-        public string DisplayName { get; private set; }
+        public string Email { get; private set; } = null!;
+        public string PasswordHash { get; private set; } = null!;
+        public string DisplayName { get; private set; } = null!;
         public DateTime CreatedAt { get; private set; }
 
         private User(string email, string passwordHash, string displayName)
@@ -28,7 +28,7 @@ namespace StockTracker.Domain.Entities
                 throw new ArgumentException("Invalid email format", nameof(email));
 
             if (string.IsNullOrWhiteSpace(passwordHash))
-                throw new ArgumentException("Password hash is reqired", nameof(passwordHash));
+                throw new ArgumentException("Password hash is required", nameof(passwordHash));
 
             if (string.IsNullOrWhiteSpace(displayName))
                 throw new ArgumentException("Display name is required", nameof(displayName));

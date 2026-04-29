@@ -3,7 +3,7 @@ using StockTracker.Domain.ValueObjects;
 
 namespace StockTracker.Application.Services
 {
-    internal class PortofolioValuationService : IPortfolioValuationService
+    public class PortfolioValuationService : IPortfolioValuationService
     {
         public PortfolioValuation Calculate(
             Portfolio portfolio,

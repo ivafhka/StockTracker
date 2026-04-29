@@ -23,7 +23,7 @@ namespace StockTracker.Application
             services.AddValidatorsFromAssembly(assembly);
 
             services.AddScoped<IAlertService, AlertService>();
-            services.AddSingleton<IPortfolioValuationService, PortofolioValuationService>();
+            services.AddSingleton<IPortfolioValuationService, PortfolioValuationService>();
             return services;
         }
     }
