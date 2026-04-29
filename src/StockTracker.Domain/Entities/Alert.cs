@@ -1,4 +1,5 @@
-﻿using StockTracker.Domain.ValueObjects;
+﻿using StockTracker.Domain.Common;
+using StockTracker.Domain.ValueObjects;
 
 namespace StockTracker.Domain.Entities
 {
@@ -7,7 +8,7 @@ namespace StockTracker.Domain.Entities
         Above = 1, 
         Below = 2
     }
-    public class Alert
+    public class Alert :Entity
     {
         public Guid UserId { get; private set; }
         public Ticker Ticker { get; private set; } = null!;
