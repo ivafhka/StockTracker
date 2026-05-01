@@ -2,6 +2,7 @@
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using StockTracker.Application.Behaviors;
+using StockTracker.Application.Services;
 using System.Reflection;
 
 namespace StockTracker.Application
@@ -21,6 +22,8 @@ namespace StockTracker.Application
 
             services.AddValidatorsFromAssembly(assembly);
 
+            services.AddScoped<IAlertService, AlertService>();
+            services.AddSingleton<IPortfolioValuationService, PortfolioValuationService>();
             return services;
         }
     }

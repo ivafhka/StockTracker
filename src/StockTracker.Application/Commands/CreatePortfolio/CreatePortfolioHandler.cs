@@ -33,7 +33,7 @@ namespace StockTracker.Application.Commands.CreatePortfolio
                 var portfolio = Portfolio.Create(request.UserId, request.Name, request.Description);
 
                 await _portfolioRepository.AddAsync(portfolio, cancellationToken);
-                await _unitOfWork.SaveChangeAsync(cancellationToken);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
 
                 return Result.Success(portfolio.Id);
             }

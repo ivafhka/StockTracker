@@ -33,6 +33,6 @@ public class Result<T> : Result
         Value = value;
     }
 
-    public static new Result<T> Success(T value) => new(value, true, null);
-    public static new Result<T> Failure(string error) => new(default, false, error);
+    public static Result<T> Success(T value) => new(value, true, null);
+    public static Result<T> Failure(string error) => new(default, false, error);
 }

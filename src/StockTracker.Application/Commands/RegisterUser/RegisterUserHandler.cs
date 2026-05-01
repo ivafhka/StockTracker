@@ -35,7 +35,7 @@ namespace StockTracker.Application.Commands.RegisterUser
                 var user = User.Register(request.Email, passwordHash, request.DisplayName);
 
                 await _userRepository.AddAsync(user, cancellationToken);
-                await _unitOfWork.SaveChangeAsync(cancellationToken);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
 
                 return Result.Success(user.Id);
             }
