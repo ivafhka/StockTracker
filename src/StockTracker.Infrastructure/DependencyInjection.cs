@@ -27,7 +27,7 @@ namespace StockTracker.Infrastructure
 
             services.AddScoped<IUnitOfWork, EfUnitOfWork>();
 
-            services.AddScoped<IUserRepository, IUserRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IPortfolioRepository, PortfolioRepository>();
             services.AddScoped<IAlertRepository, AlertRepository>();
             services.AddScoped<IPriceTickRepository, PriceTickRepository>();
