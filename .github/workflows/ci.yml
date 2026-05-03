@@ -30,3 +30,6 @@ jobs:
 
       - name: Run architecture tests
         run: dotnet test tests/StockTracker.ArchTests --configuration Release --no-build --verbosity normal
+
+      - name: Run integration tests
+        run: dotnet test tests/StockTracker.IntegrationTests --configuration Release --no-build --verbosity normal
