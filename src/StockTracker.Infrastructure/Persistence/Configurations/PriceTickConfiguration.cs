@@ -15,7 +15,7 @@ namespace StockTracker.Infrastructure.Persistence.Configurations
 
             builder.Property(x => x.Id).HasColumnName("id");
             builder.Property(x => x.Volume).HasColumnName("volume").HasColumnType("numeric(18,8)");
-            builder.Property(x => x.RecordedAt).HasColumnName("recirded_at").IsRequired();
+            builder.Property(x => x.RecordedAt).HasColumnName("recorded_at").IsRequired();
 
             builder.Property(x => x.Ticker)
                 .HasColumnName("ticker")
@@ -29,7 +29,7 @@ namespace StockTracker.Infrastructure.Persistence.Configurations
             {
                 money.Property(x => x.Amount)
                     .HasColumnName("price")
-                    .HasColumnType("numeric(18,8")
+                    .HasColumnType("numeric(18,8)")
                     .IsRequired();
 
                 money.Property(x => x.Currency)
