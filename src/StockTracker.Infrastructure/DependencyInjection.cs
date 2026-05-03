@@ -4,6 +4,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StockTracker.Application.Interfaces;
 using StockTracker.Domain.Interfaces;
+using StockTracker.Infrastructure.Kafka.Configuration;
+using StockTracker.Infrastructure.Kafka.Producer;
 using StockTracker.Infrastructure.Persistence;
 using StockTracker.Infrastructure.Persistence.Repositories;
 using StockTracker.Infrastructure.Security;
@@ -34,6 +36,10 @@ namespace StockTracker.Infrastructure
 
             services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
 
+            services.Configure<KafkaOptions>(configuration.GetSection(KafkaOptions.SectionName));
+            services.AddSingleton<ITickProducer, TickProducer>();
+            services.AddSingleton<IEventBus, KafkaEventBus>();
+            
             return services;
         }
     }
