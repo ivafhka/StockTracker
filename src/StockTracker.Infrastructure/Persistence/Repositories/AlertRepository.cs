@@ -42,7 +42,11 @@ namespace StockTracker.Infrastructure.Persistence.Repositories
 
         public Task UpdateAsync(Alert alert, CancellationToken cancellationToken = default)
         {
-            _dbContext.Alerts.Update(alert);
+            var entry = _dbContext.Entry(alert);
+            if(entry.State == EntityState.Detached)
+            {
+                _dbContext.Alerts.Update(alert);
+            }
             return Task.CompletedTask;
         }
 
