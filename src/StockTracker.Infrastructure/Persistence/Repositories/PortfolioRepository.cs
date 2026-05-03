@@ -37,14 +37,29 @@ namespace StockTracker.Infrastructure.Persistence.Repositories
 
         public Task UpdateAsync(Portfolio portfolio, CancellationToken cancellationToken = default)
         {
-            _dbContext.Portfolios.Update(portfolio);
+            var entry = _dbContext.Entry(portfolio);
+
+            if (entry.State == EntityState.Detached)
+            {
+                _dbContext.Portfolios.Update(portfolio);
+            }
+
+            foreach (var position in portfolio.Positions)
+            {
+                var positionEntry = _dbContext.Entry(position);
+                if (positionEntry.State == EntityState.Detached)
+                {
+                    positionEntry.State = EntityState.Added;
+                }
+            }
+
             return Task.CompletedTask;
         }
 
         public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
         {
             var portfolio = await _dbContext.Portfolios.FindAsync(new object[] { id }, cancellationToken);
-            if(portfolio is not null)
+            if (portfolio is not null)
             {
                 _dbContext.Portfolios.Remove(portfolio);
             }
