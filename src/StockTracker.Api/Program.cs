@@ -1,5 +1,6 @@
 using Scalar.AspNetCore;
 using StockTracker.Api;
+using StockTracker.Api.Hubs;
 using StockTracker.Api.Middleware;
 using StockTracker.Application;
 using StockTracker.Infrastructure;
@@ -29,6 +30,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<QuoteHub>("/hubs/quotes");
 
 app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }))
    .WithName("HealthCheck")
