@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -37,7 +37,7 @@ namespace StockTracker.Api.Controllers
             return Ok(result.Value);
         }
 
-        [HttpGet]
+        [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetById(Guid id)
         {
             var query = new GetPortfolioQuery(id);
@@ -64,7 +64,7 @@ namespace StockTracker.Api.Controllers
         [HttpPost("{id:guid}/positions")]
         public async Task<IActionResult> AddPosition(Guid id, [FromBody] AddPositionRequest request)
         {
-            var command = new AddPositionCommand(id, request.Ticker, request.Quanity, request.BuyPrice, request.Currency);
+            var command = new AddPositionCommand(id, request.Ticker, request.quantity, request.BuyPrice, request.Currency);
             var result = await _mediator.Send(command);
 
             if(result.IsFailure)
@@ -75,5 +75,5 @@ namespace StockTracker.Api.Controllers
     }
 
     public record CreatePortfolioRequest(string Name, string? Description);
-    public record AddPositionRequest(string Ticker, decimal Quanity, decimal BuyPrice, string Currency);
+    public record AddPositionRequest(string Ticker, decimal quantity, decimal BuyPrice, string Currency);
 }

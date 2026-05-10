@@ -1,4 +1,4 @@
-﻿using StockTracker.Domain.Entities;
+using StockTracker.Domain.Entities;
 using StockTracker.Domain.ValueObjects;
 
 namespace StockTracker.Application.Services
@@ -35,15 +35,15 @@ namespace StockTracker.Application.Services
                     currentPrice = position.AvgBuyPrice;
                 }
 
-                var costBasis = position.AvgBuyPrice.Amount * position.Quanity;
-                var currentValue = currentPrice.Amount * position.Quanity;
+                var costBasis = position.AvgBuyPrice.Amount * position.quantity;
+                var currentValue = currentPrice.Amount * position.quantity;
                 var pnl = currentValue - costBasis;
                 var pnlPercentage = costBasis == 0 ? 0 : (pnl / costBasis) * 100;
 
                 positionValuations.Add(new PositionValuation(
                     PositionId: position.Id,
                     Ticker: position.Ticker.Symbol,
-                    Quantity: position.Quanity,
+                    Quantity: position.quantity,
                     AvgBuyPrice: position.AvgBuyPrice.Amount,
                     CurrentPrice: currentPrice.Amount,
                     CurrentValue: currentValue,

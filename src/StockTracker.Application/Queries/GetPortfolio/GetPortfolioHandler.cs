@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using StockTracker.Application.Common;
 using StockTracker.Domain.Interfaces;
 
@@ -24,7 +24,7 @@ namespace StockTracker.Application.Queries.GetPortfolio
                 .Select(p => new PositionDto(
                     Id: p.Id,
                     Ticker: p.Ticker.Symbol,
-                    Quanity: p.Quanity,
+                    quantity: p.quantity,
                     AvgbuyPrice: p.AvgBuyPrice.Amount,
                     Currency: p.AvgBuyPrice.Currency,
                     OpenedAt: p.OpenedAt))

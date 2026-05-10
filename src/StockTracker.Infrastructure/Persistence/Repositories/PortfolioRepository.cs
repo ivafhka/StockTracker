@@ -23,7 +23,6 @@ namespace StockTracker.Infrastructure.Persistence.Repositories
         public async Task<IReadOnlyList<Portfolio>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
         {
             return await _dbContext.Portfolios
-                .AsNoTracking()
                 .Include(x => x.Positions)
                 .Where(x => x.UserId == userId)
                 .OrderBy(x => x.CreatedAt)
@@ -37,20 +36,20 @@ namespace StockTracker.Infrastructure.Persistence.Repositories
 
         public Task UpdateAsync(Portfolio portfolio, CancellationToken cancellationToken = default)
         {
-            var entry = _dbContext.Entry(portfolio);
-
-            if (entry.State == EntityState.Detached)
-            {
-                _dbContext.Portfolios.Update(portfolio);
-            }
-
             foreach (var position in portfolio.Positions)
             {
                 var positionEntry = _dbContext.Entry(position);
+
                 if (positionEntry.State == EntityState.Detached)
                 {
-                    positionEntry.State = EntityState.Added;
+                    _dbContext.Positions.Add(position);
                 }
+            }
+
+            var portfolioEntry = _dbContext.Entry(portfolio);
+            if (portfolioEntry.State == EntityState.Detached)
+            {
+                _dbContext.Portfolios.Update(portfolio);
             }
 
             return Task.CompletedTask;

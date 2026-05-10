@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using StockTracker.Application.Interfaces;
 using StockTracker.Domain.Interfaces;
 using StockTracker.Infrastructure.Kafka.Configuration;
+using StockTracker.Infrastructure.Kafka.Consumers;
 using StockTracker.Infrastructure.Kafka.Producer;
 using StockTracker.Infrastructure.Persistence;
 using StockTracker.Infrastructure.Persistence.Repositories;
@@ -40,6 +41,13 @@ namespace StockTracker.Infrastructure
             services.AddSingleton<ITickProducer, TickProducer>();
             services.AddSingleton<IEventBus, KafkaEventBus>();
             
+            return services;
+        }
+        public static IServiceCollection AddKafkaConsumers(this IServiceCollection services)
+        {
+            services.AddHostedService<PersistenceConsumer>();
+            services.AddHostedService<AnalyticsConsumer>();
+            services.AddHostedService<AlertConsumer>();
             return services;
         }
     }

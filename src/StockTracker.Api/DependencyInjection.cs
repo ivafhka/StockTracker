@@ -2,6 +2,7 @@
 using Microsoft.IdentityModel.Tokens;
 using StockTracker.Api.Configuration;
 using StockTracker.Api.Services;
+using StockTracker.Application.Interfaces;
 using System.Text;
 
 namespace StockTracker.Api
@@ -14,6 +15,7 @@ namespace StockTracker.Api
         {
             services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
             services.AddSingleton<IJwtTokenService, JwtTokenService>();
+            services.AddSingleton<IQuotePusher, SignalRQuotePusher>();
 
             var jwtOptions = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
                 ?? throw new InvalidOperationException("JWT options not configure");
@@ -36,7 +38,34 @@ namespace StockTracker.Api
                         IssuerSigningKey = new SymmetricSecurityKey(
                             Encoding.UTF8.GetBytes(jwtOptions.Secret))
                     };
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var accessToken = context.Request.Query["access_token"];
+                            var path = context.HttpContext.Request.Path;
+
+                            if (!string.IsNullOrEmpty(accessToken) &&
+                                path.StartsWithSegments("/hubs"))
+                            {
+                                context.Token = accessToken;
+                            }
+
+                            return Task.CompletedTask;
+                        }
+                    };
                 });
+
+            services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(policy =>
+                {
+                    policy.WithOrigins("http://localhost:5000", "https://localhost:5001")
+                    .AllowAnyHeader()
+                    .AllowAnyMethod().
+                    AllowCredentials();
+                });
+            });
 
             services.AddAuthorization();
             services.AddControllers();

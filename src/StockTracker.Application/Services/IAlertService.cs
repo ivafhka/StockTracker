@@ -3,7 +3,7 @@ using StockTracker.Domain.ValueObjects;
 
 namespace StockTracker.Application.Services
 {
-    internal interface IAlertService
+    public interface IAlertService
     {
         Task<IReadOnlyList<AlertTriggeredEvent>> EvaluateAlertsForPriceAsync(
             Ticker ticker,

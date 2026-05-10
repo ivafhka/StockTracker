@@ -36,7 +36,7 @@ namespace StockTracker.Api.Hubs
             await base.OnConnectedAsync();
         }
 
-        public async Task OnDisconnectedAsync(Exception? exception)
+        public override async Task OnDisconnectedAsync(Exception? exception)
         {
             _logger.LogInformation("Client disconnected: {ConnectionId}", Context.ConnectionId);
             await base.OnDisconnectedAsync(exception);

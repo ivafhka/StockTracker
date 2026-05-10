@@ -1,4 +1,4 @@
-﻿using StockTracker.Domain.Common;
+using StockTracker.Domain.Common;
 using StockTracker.Domain.ValueObjects;
 
 namespace StockTracker.Domain.Entities
@@ -33,7 +33,7 @@ namespace StockTracker.Domain.Entities
             };
         }
 
-        public Position AddPosition(Ticker ticker, decimal quanity, Money buyPrice)
+        public Position AddPosition(Ticker ticker, decimal quantity, Money buyPrice)
         {
             ArgumentNullException.ThrowIfNull(ticker);
 
@@ -41,11 +41,11 @@ namespace StockTracker.Domain.Entities
 
             if(existing is not null)
             {
-                existing.IncreaseQuanity(quanity, buyPrice);
+                existing.Increasequantity(quantity, buyPrice);
                 return existing;
             }
 
-            var position = Position.Open(Id, ticker, quanity, buyPrice);
+            var position = Position.Open(Id, ticker, quantity, buyPrice);
             _positions.Add(position);
             return position;
         }

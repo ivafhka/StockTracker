@@ -11,7 +11,8 @@ builder.Services.AddOpenApi();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApiservices(builder.Configuration);
-
+builder.Services.AddSignalR();
+builder.Services.AddKafkaConsumers();
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -26,9 +27,12 @@ if (app.Environment.IsDevelopment())
 }
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseHttpsRedirection();
+app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseDefaultFiles();
+app.UseStaticFiles();
 app.MapControllers();
 app.MapHub<QuoteHub>("/hubs/quotes");
 
