@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace StockTracker.Application.Commands.AddPosition
 {
@@ -13,8 +13,8 @@ namespace StockTracker.Application.Commands.AddPosition
                 .NotEmpty().WithMessage("Ticker is required")
                 .MaximumLength(5);
 
-            RuleFor(x => x.Quanity)
-                .GreaterThan(0).WithMessage("Quanity must be positive");
+            RuleFor(x => x.quantity)
+                .GreaterThan(0).WithMessage("quantity must be positive");
 
             RuleFor(x => x.BuyPrice)
                 .GreaterThan(0).WithMessage("Buy price must be positive");

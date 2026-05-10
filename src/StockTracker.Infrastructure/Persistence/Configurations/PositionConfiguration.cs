@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using StockTracker.Domain.Entities;
 using StockTracker.Domain.ValueObjects;
@@ -15,7 +15,7 @@ namespace StockTracker.Infrastructure.Persistence.Configurations
 
             builder.Property(x => x.Id).HasColumnName("id");
             builder.Property(x => x.PortfolioId).HasColumnName("portfolio_id").IsRequired();
-            builder.Property(x => x.Quanity).HasColumnName("quantity").HasColumnType("numeric(18,8)");
+            builder.Property(x => x.quantity).HasColumnName("quantity").HasColumnType("numeric(18,8)");
             builder.Property(x => x.OpenedAt).HasColumnName("opened_at");
 
             builder.Property(x => x.Ticker)

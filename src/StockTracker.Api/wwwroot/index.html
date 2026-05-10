@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Tracker</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0f1117;
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+
+        header {
+            background: #1a1d27;
+            border-bottom: 1px solid #2d3748;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+            header h1 {
+                font-size: 20px;
+                font-weight: 700;
+                color: #7c3aed;
+            }
+
+        #user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            color: #94a3b8;
+        }
+
+        button {
+            background: #7c3aed;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+            button:hover {
+                background: #6d28d9;
+            }
+
+            button.secondary {
+                background: #2d3748;
+                color: #e2e8f0;
+            }
+
+                button.secondary:hover {
+                    background: #374151;
+                }
+
+            button.danger {
+                background: #dc2626;
+            }
+
+                button.danger:hover {
+                    background: #b91c1c;
+                }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .card {
+            background: #1a1d27;
+            border: 1px solid #2d3748;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+            .card h2 {
+                font-size: 16px;
+                font-weight: 600;
+                margin-bottom: 16px;
+                color: #a78bfa;
+            }
+
+        input, select {
+            width: 100%;
+            background: #0f1117;
+            border: 1px solid #2d3748;
+            color: #e2e8f0;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+            input:focus, select:focus {
+                outline: none;
+                border-color: #7c3aed;
+            }
+
+        .ticker-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .ticker-item {
+            background: #0f1117;
+            border: 1px solid #2d3748;
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+            .ticker-item:hover, .ticker-item.active {
+                border-color: #7c3aed;
+            }
+
+            .ticker-item .symbol {
+                font-size: 16px;
+                font-weight: 700;
+                color: #e2e8f0;
+            }
+
+            .ticker-item .price {
+                font-size: 20px;
+                font-weight: 700;
+                color: #10b981;
+                margin-top: 4px;
+            }
+
+            .ticker-item .indicators {
+                font-size: 11px;
+                color: #64748b;
+                margin-top: 4px;
+            }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+        }
+
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 16px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #dc2626;
+        }
+
+            .status-dot.connected {
+                background: #10b981;
+            }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .modal-overlay.open {
+                display: flex;
+            }
+
+        .modal {
+            background: #1a1d27;
+            border: 1px solid #2d3748;
+            border-radius: 12px;
+            padding: 24px;
+            width: 400px;
+            max-width: 90vw;
+        }
+
+            .modal h2 {
+                margin-bottom: 16px;
+                font-size: 18px;
+                color: #a78bfa;
+            }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .tab {
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            background: #0f1117;
+            color: #64748b;
+            border: 1px solid #2d3748;
+        }
+
+            .tab.active {
+                background: #7c3aed;
+                color: white;
+                border-color: #7c3aed;
+            }
+
+        .error-msg {
+            color: #f87171;
+            font-size: 13px;
+            margin-top: 4px;
+            min-height: 20px;
+        }
+
+        .portfolio-section {
+            margin-top: 16px;
+        }
+
+        .position-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .position-item {
+            background: #0f1117;
+            border-radius: 8px;
+            padding: 10px 12px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+        }
+
+            .position-item .pos-ticker {
+                font-weight: 700;
+                color: #a78bfa;
+            }
+
+            .position-item .pos-qty {
+                color: #94a3b8;
+            }
+
+        label {
+            font-size: 12px;
+            color: #64748b;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .form-group {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>?? Stock Tracker</h1>
+        <div id="user-info">
+            <span id="username-display"></span>
+            <button class="secondary" id="portfolio-btn" style="display:none" onclick="showPortfolioModal()">My Portfolio</button>
+            <button class="secondary" id="logout-btn" style="display:none" onclick="logout()">Logout</button>
+            <button id="auth-btn" onclick="showAuthModal()">Sign In</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="status-bar">
+            <div class="status-dot" id="status-dot"></div>
+            <span id="status-text">Disconnected</span>
+        </div>
+
+        <div class="grid">
+            <div>
+                <div class="card">
+                    <h2>Live Quotes</h2>
+                    <div class="ticker-list" id="ticker-list">
+                        <div style="color:#64748b;font-size:13px">Sign in and connect to see live quotes</div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="card">
+                    <h2 id="chart-title">Select a ticker to view chart</h2>
+                    <div class="chart-container">
+                        <canvas id="priceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div class="modal-overlay" id="auth-modal">
+        <div class="modal">
+            <h2>Account</h2>
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('login')">Sign In</div>
+                <div class="tab" onclick="switchTab('register')">Register</div>
+            </div>
+
+            <div id="login-form">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="login-email" placeholder="you@example.com">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="login-password" placeholder="��������">
+                </div>
+                <div class="error-msg" id="login-error"></div>
+                <button onclick="login()" style="width:100%;margin-top:8px">Sign In</button>
+            </div>
+
+            <div id="register-form" style="display:none">
+                <div class="form-group">
+                    <label>Display Name</label>
+                    <input type="text" id="reg-name" placeholder="Ivan Petrov">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="reg-email" placeholder="you@example.com">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="reg-password" placeholder="Min 8 chars, 1 uppercase, 1 digit">
+                </div>
+                <div class="error-msg" id="reg-error"></div>
+                <button onclick="register()" style="width:100%;margin-top:8px">Create Account</button>
+            </div>
+
+            <button class="secondary" style="width:100%;margin-top:8px" onclick="closeModal('auth-modal')">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Portfolio Modal -->
+    <div class="modal-overlay" id="portfolio-modal">
+        <div class="modal" style="width:500px">
+            <h2>My Portfolio</h2>
+
+            <div id="no-portfolio" class="portfolio-section">
+                <p style="color:#64748b;font-size:13px;margin-bottom:12px">No portfolio yet. Create one to track positions.</p>
+                <div class="form-group">
+                    <label>Portfolio Name</label>
+                    <input type="text" id="portfolio-name" placeholder="My Investments">
+                </div>
+                <button onclick="createPortfolio()">Create Portfolio</button>
+            </div>
+
+            <div id="has-portfolio" class="portfolio-section" style="display:none">
+                <p style="font-size:13px;color:#94a3b8;margin-bottom:12px" id="portfolio-name-display"></p>
+
+                <h3 style="font-size:14px;margin-bottom:8px;color:#94a3b8">Add Position</h3>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                    <div class="form-group">
+                        <label>Ticker</label>
+                        <input type="text" id="pos-ticker" placeholder="AAPL" style="text-transform:uppercase">
+                    </div>
+                    <div class="form-group">
+                        <label>Quantity</label>
+                        <input type="number" id="pos-qty" placeholder="10">
+                    </div>
+                    <div class="form-group">
+                        <label>Buy Price</label>
+                        <input type="number" id="pos-price" placeholder="150.00" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Currency</label>
+                        <select id="pos-currency">
+                            <option>USD</option>
+                            <option>EUR</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="error-msg" id="pos-error"></div>
+                <button onclick="addPosition()">Add Position</button>
+
+                <h3 style="font-size:14px;margin-top:16px;margin-bottom:8px;color:#94a3b8">Positions</h3>
+                <div class="position-list" id="position-list"></div>
+            </div>
+
+            <button class="secondary" style="width:100%;margin-top:16px" onclick="closeModal('portfolio-modal')">Close</button>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://localhost:5000/api';
+        const TICKERS = ['AAPL', 'MSFT', 'GOOGL', 'TSLA'];
+
+        let token = localStorage.getItem('token');
+        let userId = localStorage.getItem('userId');
+        let displayName = localStorage.getItem('displayName');
+        let connection = null;
+        let chart = null;
+        let portfolioId = localStorage.getItem('portfolioId');
+        let activeTicker = null;
+        let priceHistory = {};
+
+        // --- Auth ----------------------------------------------
+        function showAuthModal() { openModal('auth-modal'); }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach((t, i) => {
+                t.classList.toggle('active', (i === 0) === (tab === 'login'));
+            });
+            document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
+            document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
+        }
+
+        async function login() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            document.getElementById('login-error').textContent = '';
+
+            try {
+                const res = await fetch(`${API}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await res.json();
+                if (!res.ok) { document.getElementById('login-error').textContent = data.error; return; }
+
+                token = data.token;
+                userId = data.userId;
+                displayName = data.displayName;
+                localStorage.setItem('token', token);
+                localStorage.setItem('userId', userId);
+                localStorage.setItem('displayName', displayName);
+
+                onLoggedIn();
+                closeModal('auth-modal');
+            } catch (e) {
+                document.getElementById('login-error').textContent = 'Connection error';
+            }
+        }
+
+        async function register() {
+            const name = document.getElementById('reg-name').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            document.getElementById('reg-error').textContent = '';
+
+            try {
+                const res = await fetch(`${API}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, displayName: name })
+                });
+
+                const data = await res.json();
+                if (!res.ok) { document.getElementById('reg-error').textContent = data.error; return; }
+
+                document.getElementById('reg-error').style.color = '#10b981';
+                document.getElementById('reg-error').textContent = 'Registered! Please sign in.';
+                setTimeout(() => switchTab('login'), 1500);
+            } catch (e) {
+                document.getElementById('reg-error').textContent = 'Connection error';
+            }
+        }
+
+        function logout() {
+            token = null; userId = null; displayName = null; portfolioId = null;
+            localStorage.clear();
+            if (connection) connection.stop();
+            document.getElementById('auth-btn').style.display = '';
+            document.getElementById('logout-btn').style.display = 'none';
+            document.getElementById('portfolio-btn').style.display = 'none';
+            document.getElementById('username-display').textContent = '';
+            setStatus(false);
+            document.getElementById('ticker-list').innerHTML = '<div style="color:#64748b;font-size:13px">Sign in and connect to see live quotes</div>';
+        }
+
+        function onLoggedIn() {
+            document.getElementById('auth-btn').style.display = 'none';
+            document.getElementById('logout-btn').style.display = '';
+            document.getElementById('portfolio-btn').style.display = '';
+            document.getElementById('username-display').textContent = displayName;
+            connectSignalR();
+            loadPortfolio();
+        }
+
+        // --- SignalR --------------------------------------------
+        async function connectSignalR() {
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl('http://localhost:5000/hubs/quotes', {
+                    accessTokenFactory: () => token
+                })
+                .withAutomaticReconnect()
+                .build();
+
+            connection.on('ReceiveQuote', (update) => {
+                updateTickerCard(update);
+                if (activeTicker === update.ticker) {
+                    addChartPoint(update);
+                }
+            });
+
+            connection.onreconnecting(() => setStatus(false));
+            connection.onreconnected(() => {
+                setStatus(true);
+                TICKERS.forEach(t => connection.invoke('Subscribe', t));
+            });
+
+            try {
+                await connection.start();
+                setStatus(true);
+                TICKERS.forEach(t => connection.invoke('Subscribe', t));
+                initTickerCards();
+            } catch (e) {
+                setStatus(false);
+                console.error('SignalR error:', e);
+            }
+        }
+
+        function setStatus(connected) {
+            document.getElementById('status-dot').className = 'status-dot' + (connected ? ' connected' : '');
+            document.getElementById('status-text').textContent = connected ? 'Connected' : 'Disconnected';
+        }
+
+        // --- Tickers --------------------------------------------
+        function initTickerCards() {
+            const list = document.getElementById('ticker-list');
+            list.innerHTML = '';
+            TICKERS.forEach(ticker => {
+                const div = document.createElement('div');
+                div.className = 'ticker-item';
+                div.id = `ticker-${ticker}`;
+                div.onclick = () => selectTicker(ticker);
+                div.innerHTML = `
+                <div class="symbol">${ticker}</div>
+                <div class="price" id="price-${ticker}">�</div>
+                <div class="indicators" id="ind-${ticker}">SMA20: � | EMA12: �</div>
+            `;
+                list.appendChild(div);
+            });
+        }
+
+        function updateTickerCard(update) {
+            const priceEl = document.getElementById(`price-${update.ticker}`);
+            const indEl = document.getElementById(`ind-${update.ticker}`);
+            if (priceEl) priceEl.textContent = `$${update.price.toFixed(2)}`;
+            if (indEl) {
+                const sma = update.sma20 ? update.sma20.toFixed(2) : '�';
+                const ema = update.ema12 ? update.ema12.toFixed(2) : '�';
+                indEl.textContent = `SMA20: ${sma} | EMA12: ${ema}`;
+            }
+
+            if (!priceHistory[update.ticker]) priceHistory[update.ticker] = [];
+            priceHistory[update.ticker].push({ price: update.price, time: new Date(update.timestamp) });
+            if (priceHistory[update.ticker].length > 100) priceHistory[update.ticker].shift();
+        }
+
+        function selectTicker(ticker) {
+            activeTicker = ticker;
+            document.querySelectorAll('.ticker-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(`ticker-${ticker}`)?.classList.add('active');
+            document.getElementById('chart-title').textContent = `${ticker} � Live Price`;
+            initChart(ticker);
+        }
+
+        // --- Chart ----------------------------------------------
+        function initChart(ticker) {
+            const ctx = document.getElementById('priceChart').getContext('2d');
+            if (chart) chart.destroy();
+
+            const history = priceHistory[ticker] || [];
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: history.map(p => p.time.toLocaleTimeString()),
+                    datasets: [{
+                        label: ticker,
+                        data: history.map(p => p.price),
+                        borderColor: '#7c3aed',
+                        backgroundColor: 'rgba(124,58,237,0.1)',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: {
+                            ticks: { color: '#64748b', maxTicksLimit: 8 },
+                            grid: { color: '#1e2535' }
+                        },
+                        y: {
+                            ticks: { color: '#64748b' },
+                            grid: { color: '#1e2535' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function addChartPoint(update) {
+            if (!chart) return;
+            const time = new Date(update.timestamp).toLocaleTimeString();
+            chart.data.labels.push(time);
+            chart.data.datasets[0].data.push(update.price);
+            if (chart.data.labels.length > 100) {
+                chart.data.labels.shift();
+                chart.data.datasets[0].data.shift();
+            }
+            chart.update('none');
+        }
+
+        // --- Portfolio ------------------------------------------
+        async function showPortfolioModal() {
+            await loadPortfolio();
+            openModal('portfolio-modal');
+        }
+
+        async function loadPortfolio() {
+            if (!token || !portfolioId) {
+                tryGetExistingPortfolio();
+                return;
+            }
+            try {
+                const res = await fetch(`${API}/portfolios/${portfolioId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) { portfolioId = null; localStorage.removeItem('portfolioId'); return; }
+                const data = await res.json();
+                showPortfolioData(data);
+            } catch (e) { console.error(e); }
+        }
+
+        async function tryGetExistingPortfolio() {
+            if (!token) return;
+            try {
+                const res = await fetch(`${API}/portfolios`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) return;
+                const data = await res.json();
+                if (data.length > 0) {
+                    portfolioId = data[0].id;
+                    localStorage.setItem('portfolioId', portfolioId);
+                    showPortfolioData(data[0]);
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function showPortfolioData(data) {
+            document.getElementById('no-portfolio').style.display = 'none';
+            document.getElementById('has-portfolio').style.display = 'block';
+            document.getElementById('portfolio-name-display').textContent = `?? ${data.name}`;
+
+            const list = document.getElementById('position-list');
+            list.innerHTML = '';
+            if (!data.positions || data.positions.length === 0) {
+                list.innerHTML = '<div style="color:#64748b;font-size:13px">No positions yet</div>';
+                return;
+            }
+            data.positions.forEach(pos => {
+                const div = document.createElement('div');
+                div.className = 'position-item';
+                div.innerHTML = `
+                <div>
+                    <span class="pos-ticker">${pos.ticker}</span>
+                    <span class="pos-qty" style="margin-left:8px">${pos.quantity} shares</span>
+                </div>
+                <div style="color:#94a3b8">avg $${(pos.avgBuyPrice ?? pos.avgBuyPrice ?? 0).toFixed(2)}</div><div style="color:#94a3b8">avg $${(pos.avgBuyPrice ?? pos.avgBuyPrice ?? 0).toFixed(2)}</div>
+            `;
+                list.appendChild(div);
+            });
+        }
+
+        async function createPortfolio() {
+            const name = document.getElementById('portfolio-name').value;
+            if (!name) return;
+
+            try {
+                const res = await fetch(`${API}/portfolios`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ name, description: '' })
+                });
+                const data = await res.json();
+                if (!res.ok) return;
+
+                portfolioId = data.id;
+                localStorage.setItem('portfolioId', portfolioId);
+                await loadPortfolio();
+            } catch (e) { console.error(e); }
+        }
+
+        async function addPosition() {
+            const ticker = document.getElementById('pos-ticker').value.toUpperCase();
+            const qty = parseFloat(document.getElementById('pos-qty').value);
+            const price = parseFloat(document.getElementById('pos-price').value);
+            const currency = document.getElementById('pos-currency').value;
+            document.getElementById('pos-error').textContent = '';
+
+            if (!ticker || !qty || !price) {
+                document.getElementById('pos-error').textContent = 'Fill all fields';
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API}/portfolios/${portfolioId}/positions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ ticker, quantity: qty, buyPrice: price, currency })
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    document.getElementById('pos-error').textContent = data.error;
+                    return;
+                }
+                await loadPortfolio();
+            } catch (e) {
+                document.getElementById('pos-error').textContent = 'Connection error';
+            }
+        }
+
+        // --- Utils ----------------------------------------------
+        function openModal(id) { document.getElementById(id).classList.add('open'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+        // Init
+        if (token) onLoggedIn();
+    </script>
+</body>
+</html>

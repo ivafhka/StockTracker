@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using StockTracker.Application.Common;
 using StockTracker.Application.Interfaces;
 using StockTracker.Domain.Events;
@@ -34,7 +34,7 @@ namespace StockTracker.Application.Commands.AddPosition
                 var ticker = Ticker.Create(request.Ticker);
                 var buyPrice = Money.Create(request.BuyPrice, request.Currency);
 
-                var position = portfolio.AddPosition(ticker, request.Quanity, buyPrice);
+                var position = portfolio.AddPosition(ticker, request.quantity, buyPrice);
 
                 await _portfolioRepository.UpdateAsync(portfolio, cancellationToken);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -43,7 +43,7 @@ namespace StockTracker.Application.Commands.AddPosition
                     PositionId: position.Id,
                     PortfolioId: portfolio.Id,
                     Ticker: ticker,
-                    Quanity: request.Quanity,
+                    quantity: request.quantity,
                     BuyPrice: buyPrice);
 
                 await _eventBus.PublishAsync(domainEvent, cancellationToken);
