@@ -1,4 +1,4 @@
-﻿using StockTracker.Domain.Common;
+using StockTracker.Domain.Common;
 using StockTracker.Domain.ValueObjects;
 
 namespace StockTracker.Domain.Entities
@@ -7,55 +7,55 @@ namespace StockTracker.Domain.Entities
     {
         public Guid PortfolioId { get; private set; }
         public Ticker Ticker { get; private set; } = null!;
-        public decimal Quanity { get; private set; }
+        public decimal quantity { get; private set; }
         public Money AvgBuyPrice { get; private set; } = null!;
         public DateTime OpenedAt { get; private set; }
 
         private Position () { }
 
-        internal static Position Open(Guid portfolioId, Ticker ticker, decimal quanity, Money buyprice)
+        internal static Position Open(Guid portfolioId, Ticker ticker, decimal quantity, Money buyprice)
         {
             ArgumentNullException.ThrowIfNull(ticker);
             ArgumentNullException.ThrowIfNull(buyprice);
 
-            if (quanity <= 0)
-                throw new ArgumentException("Quanity must be positive", nameof(quanity));
+            if (quantity <= 0)
+                throw new ArgumentException("quantity must be positive", nameof(quantity));
 
             return new Position
             {
                 PortfolioId = portfolioId,
                 Ticker = ticker,
-                Quanity = quanity,
+                quantity = quantity,
                 AvgBuyPrice = buyprice,
                 OpenedAt = DateTime.UtcNow
             };
         }
 
-        public void IncreaseQuanity(decimal additionalQuanity, Money buyPrice)
+        public void Increasequantity(decimal additionalquantity, Money buyPrice)
         {
             ArgumentNullException.ThrowIfNull(buyPrice);
 
-            if (additionalQuanity <= 0)
-                throw new ArgumentException("Additional quanity must be positive", nameof(additionalQuanity));
+            if (additionalquantity <= 0)
+                throw new ArgumentException("Additional quantity must be positive", nameof(additionalquantity));
 
-            var totalCost = AvgBuyPrice.Multiply(Quanity).Add(buyPrice.Multiply(additionalQuanity));
-            var newQuanity = Quanity + additionalQuanity;
+            var totalCost = AvgBuyPrice.Multiply(quantity).Add(buyPrice.Multiply(additionalquantity));
+            var newquantity = quantity + additionalquantity;
 
-            Quanity = newQuanity;
-            AvgBuyPrice = Money.Create(totalCost.Amount / newQuanity, buyPrice.Currency);
+            quantity = newquantity;
+            AvgBuyPrice = Money.Create(totalCost.Amount / newquantity, buyPrice.Currency);
         }
 
         public Money CalculateCurrntValue(Money currnetPrice)
         {
             ArgumentNullException.ThrowIfNull(currnetPrice);
-            return currnetPrice.Multiply(Quanity);
+            return currnetPrice.Multiply(quantity);
         }
 
         public Money CalculatePnL(Money currentPrice)
         {
             ArgumentNullException.ThrowIfNull(currentPrice);
-            var currnetvalue = currentPrice.Multiply(Quanity);
-            var costBasis = AvgBuyPrice.Multiply(Quanity);
+            var currnetvalue = currentPrice.Multiply(quantity);
+            var costBasis = AvgBuyPrice.Multiply(quantity);
             return currnetvalue.Subtract(costBasis);
         }
     }

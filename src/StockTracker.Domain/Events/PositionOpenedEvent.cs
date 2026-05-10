@@ -1,4 +1,4 @@
-﻿using StockTracker.Domain.Common;
+using StockTracker.Domain.Common;
 using StockTracker.Domain.ValueObjects;
 
 namespace StockTracker.Domain.Events
@@ -8,7 +8,7 @@ namespace StockTracker.Domain.Events
         Guid PositionId,
         Guid PortfolioId,
         Ticker Ticker,
-        decimal Quanity,
+        decimal quantity,
         Money BuyPrice ) : IDomainEvents
     {
         public Guid EventId { get; } = Guid.NewGuid();
